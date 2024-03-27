@@ -1,7 +1,7 @@
 //************************************************************************
 // ASU CSE310 Assignment #6 Spring 2024
 // Author: Nilay Kumar
-// ASU ID: 
+// ASU ID: 1225127891
 // Description: this is the main program that reads input from keyboard,
 // it then execute various red-black tree operations which is given in the input.
 //**************************************************************************
@@ -94,34 +94,45 @@ int main()
       {
          //call the getCarKey function to get the Car key first
          //----
+
+         getCarKey(oneLine, vin, model, make);     //just call the function
+
          cout << "\nCommand: tree_predecessor" << endl;
 
          //call the relevant function on the red black tree
          //----
          
-
+         RBT.treePredecessor(vin, model, make);       //call predecessor function
 
       }
       else if(command.compare("tree_successor")==0)
       {
          //call the getCarKey function to get the Car key first
          //----
+
+         getCarKey(oneLine, vin, model, make);        //call function
+
          cout << "\nCommand: tree_successor" << endl;
          //call the relevant function on the red black tree
          //----
+         RBT.treeSuccessor(vin, model, make);         //successor function called
       }
       else if(command.compare("tree_search")==0)
       {
          //call the getCarKey function to get the Car key first
          //----
+         getCarKey(oneLine, vin, model, make);        //get car key function
          cout << "\nCommand: tree_search" << endl;
          //call the relevant function on the red black tree
          //----
+         RBT.treeSearch(vin, model, make);         //find the node using treeSearch
       }
       else if(command.compare("tree_insert")==0)
       {
          //call the getCarInfo function to get the Car key first
          //----
+         getCarInfo(oneLine, vin, model, make, price);      //simply call getCarInfo
+
          cout << "\nCommand: tree_insert" << endl;
          cout << left;
          cout << setw(8)  << vin
@@ -132,6 +143,8 @@ int main()
         //call the relevant function to insert the Car
          //----
          RBT.treeInsert(vin, model, make, price);     //just call function with parameters
+
+
         }
    } while(true);  //continue until 'quit'
    return 0;
@@ -165,6 +178,9 @@ void getCarKey(string oneLine, int& vin, string& model, string& make)
    token = line.substr(0, position);
    make = token;
    line.erase(0, position+delimiter.length());
+
+   //now lets make the key
+   string nodeKey = to_string(node->vin) + node->model + node->make;
    
 }
 
@@ -174,4 +190,31 @@ void getCarInfo(string oneLine, int& vin, string& model, string& make, double& p
 {
    //Design your own code here
    //----
+
+   string delimiter = ",";          //comma is delimiter
+   int position = line.find(delimiter);      //find the position of delimiter
+   line.erase(0, position+delimiter.length());     //delete first phrase because we need the info that comes after it
+
+   position = line.find(delimiter);             //this block is for the vin
+   token = line.substr(0, position);
+   vin = token;
+   line.erase(0, position+delimiter.length());
+
+   position = line.find(delimiter);          //this block is for the model
+   token = line.substr(0, position);
+   model = token;
+   line.erase(0, position+delimiter.length());
+
+   position = line.find(delimiter);       //this block is for the make
+   token = line.substr(0, position);
+   make = token;
+   line.erase(0, position+delimiter.length());
+
+   position = line.find(delimiter);       //this block is for the price
+   token = line.substr(0, position);
+   price = token;
+   line.erase(0, position+delimiter.length());
+
+
 }
+
