@@ -1,16 +1,18 @@
 //************************************************************************
 // ASU CSE310 Assignment #6 Spring 2024
 // Author: Nilay Kumar
-// ASU ID: 
+// ASU ID: 1225127891
 // Description: Red black tree implementation. See RedBlackTree.h
 //              for the Red Black Tree definition
 //************************************************************************
 
 //include the relevant header file
 //----
-#include "RedBlackTree.h";
+#include "RedBlackTree.h"
 
 using namespace std;
+
+int nodeSize = 0;       //counter to be able to tell how many nodes were deleted
 
 //*******************************************************************
 //constructor
@@ -55,11 +57,11 @@ Node* RedBlackTree::getRoot() {
 //write your own code according to red-black tree definition
 //----
 int RedBlackTree::deleteNode(Node *node) {
-      int nodeSize = 0;
+      
 
       //first lets set the base case for this recursive function
       if (node == nullptr) {
-            return;
+            return 0;
       }
       
       deleteNode(node->leftChild);           //delete everything on the left
@@ -67,6 +69,9 @@ int RedBlackTree::deleteNode(Node *node) {
 
       delete node;            //this will actually delete the current node
       nodeSize++;       //increment for node delete count when printing after calling destructor
+
+      //return the nodeSize
+      return nodeSize;
 }
 
 
@@ -82,9 +87,12 @@ void RedBlackTree::insertNode(Node *node) {
       Node* y = nullptr;            //make some pointers to help traverse through the tree
       Node* x = root;
 
+      //make the key
+      string nodeKey = to_string(node->vin) + node->model + node->make;
+
       while (x != nullptr) {              //while root is not null, set main pointer equal to it
             y = x;
-            if (node->vin < x->vin) {           //if node vin is less than root's vin/x's vin (when not root also)
+            if (compareNodes(x, nodeKey) > 0/*node->vin < x->vin*/) {           //if node vin is less than root's vin/x's vin (when not root also)
                   x = x->leftChild;             //move to the left child
             } else {
                   x = x->rightChild;            //means it's greater than, so move to the right
@@ -95,9 +103,9 @@ void RedBlackTree::insertNode(Node *node) {
       node->parent = y;
 
       //lets determine whether the node needs to be on the left or right of parent node
-      if (y == nullptr) {           //just to make sure in case the tree is empty, in which case the above loop wouldn't really do anytihng
+      if (y == nullptr) {           //just to make sure if parent is null
             root = node;
-      }else if(node->vin < y->vin) {            //if new node's vin is less than parent vin, it becomes left child
+      }else if (compareNodes(y, nodeKey) > 0/*node->vin < y->vin*/) {            //if new node's vin is less than parent vin, it becomes left child
             y->leftChild = node;
       } else {                                  //if new node's vin is greater than parent, then it becomes the right child
             y->rightChild = node;
@@ -108,6 +116,9 @@ void RedBlackTree::insertNode(Node *node) {
 
       //lastly we have to call fixup to make sure that there is no violations with the current tree
       fixUp(node);
+
+      //lets increment nodeSize
+      //nodeSize++;
 
 }
 
@@ -126,14 +137,14 @@ void RedBlackTree::fixUp(Node *node) {
 
             if (node->parent == node->parent->parent->leftChild) {      //if the parent is a left child
 
-                  Node* uncle = node->parent->parent->rightChild;       //set the uncle to use later
+                  Node* uncle = node->parent->parent->rightChild;       //set the uncle to use later which has to be a right child
 
                   //lets start with doing case #1, where uncle is red
-                  if (uncle != nullptr && uncle->color == "RED") {
+                  if (uncle != nullptr &&uncle->color == "RED") {
                         
                         node->parent->color = "BLACK";            //change parent to black
                         uncle->color = "BLACK";             //change uncle to black as well
-                        node->parent->parent->color == "RED";           //change grandparent to red     
+                        node->parent->parent->color = "RED";           //change grandparent to red     
                         node = node->parent->parent;        //move the current node up to the grandparent, to then check for violations
                   } else {
 
@@ -142,14 +153,14 @@ void RedBlackTree::fixUp(Node *node) {
 
                         node = node->parent;          //move the current to the parent  node for the left rotation
                         leftRotate(node);             //perform the left rotation on the parent node
-                  }
+                        }
 
                   //now lets do the case #3, where uncle is black, and the current node is the right child
                  //since we are reaching this case no matter what if we perform case #2, since it's terminal, we dont need an outlying condition
 
-                  node->parent->color = "BLACK";      //change color of parent to black
-                  node->parent->parent->color = "RED";      //make grand parent change to red
-                  rightRotate(node->parent->parent);        //right rotate on the grand parent
+                        node->parent->color = "BLACK";      //change color of parent to black
+                        node->parent->parent->color = "RED";      //make grand parent change to red
+                        rightRotate(node->parent->parent);        //right rotate on the grand parent
                   }
 
 
@@ -163,7 +174,7 @@ void RedBlackTree::fixUp(Node *node) {
 
                         node->parent->color = "BLACK";                  //repeat same steps as above case #1
                         uncle->color = "BLACK";
-                        node->parent->parent->color == "RED";
+                        node->parent->parent->color = "RED";
                         node = node->parent->parent;
                   } else {
 
@@ -173,12 +184,11 @@ void RedBlackTree::fixUp(Node *node) {
                               node = node->parent;                //move to parent and then right rotate to then later move to case 3
                               rightRotate(node);
                         }
-
+                  
                         //now case 3
                         node->parent->color = "BLACK";            //set parent to black
                         node->parent->parent->color = "RED";                 //set grand parent to red
                         leftRotate(node->parent->parent);         //call left rotate to then have a full tree
-
                   }
             }
       }
@@ -302,10 +312,14 @@ Node* RedBlackTree::treeSearch(int vin, string model, string make) {
             //now lets compare the data with the current's data
             if (current->vin == vin && current->model == model && current->make == make) {        //perfect case scenario where everything matches    
                   return current;
+
                   //this next if statement is for checking if any of the stats are less than that of the current node, in which case it'll take the left child
             } else if (vin < current->vin || (vin == current->vin && model < current->model) || (vin == current->vin && model == current->model && make < current->make)) {
+                  
                   current = current->leftChild;
+
             } else {          //nothing else met so that means it has to move to the right child
+                  
                   current = current->rightChild;
             }
       }
@@ -342,11 +356,13 @@ void RedBlackTree::leftRotate(Node *node) {
       if (node->parent == nullptr) {
             root = rightChild;
       //if node is left child, update left child of the parent
-      }else if (node == node->parent->leftChild) {
-            node->parent ->leftChild = rightChild;
-      //if node is the rich child, update the right child of the parent
       }else {
-            node->parent->rightChild = rightChild;
+            if (node == node->parent->leftChild) {
+                  node->parent->leftChild = rightChild;
+            //if node is the right child, update the right child of the parent
+            } else {
+                  node->parent->rightChild = rightChild;
+            }
       }
 
       //node needs to be set as the leftChild of rightChild
@@ -481,7 +497,7 @@ void RedBlackTree::treeMinimum() {
 
       //now lets write the conditions and print statements based on the output of the findMinimumNode function that we called
       if (minNode != nullptr) {
-            cout << "Minimum Node in the tree: " << endl;
+            cout << "The MINIMUM is:" << endl;
             print(minNode);
       } else {
             cout << "Tree is empty. No Minimum." << endl;
@@ -504,7 +520,7 @@ void RedBlackTree::treeMaximum() {
 
       //now lets write the conditions again to print the info of this
       if (maxNode != nullptr) {
-            cout << "Maximum Node in the tree: " << endl;
+            cout << "The MAXIMUM is:" << endl;
             print(maxNode);
       } else {
             cout << "Tree is empty. No Maximum." << endl;
@@ -519,9 +535,7 @@ void RedBlackTree::treeMaximum() {
 
 void RedBlackTree::treePreorder() {
 
-      //we just need to print out some info and then call the actual preorder function
-
-      cout << "Pre-Order traversal of the tree: " << endl;
+      
       preOrderTraversal(root);      //always start the traversal from the root
 }
 
@@ -532,9 +546,8 @@ void RedBlackTree::treePreorder() {
 //----
 
 void RedBlackTree::treeInorder() {
+      //same as above
 
-      //same as above, print out some info stating you're starting to print the actual function and then call the function
-      cout << "In-Order traversal of the tree: " << endl;
       inorderTraversal(root);       //again start at the root
 }
 
@@ -546,9 +559,7 @@ void RedBlackTree::treeInorder() {
 
 void RedBlackTree::treePostorder() {
 
-      //same as above two functions
-
-      cout << "Post-Order traversal of the tree: " << endl;
+      //same as above
       postOrderTraversal(root);           //start at the root to encompass all the nodes
 }
 
@@ -578,10 +589,10 @@ void RedBlackTree::treePredecessor(int vin, string model, string make) {
 
       //if it's found, print out the information
       if (predecessor != nullptr) {
-            cout << "Predecessor is FOUND." << endl;
+            cout << "Its Predecessor is: " << endl;
             print(predecessor);
       }else {     //and if its not found, print statement accordingly
-            cout << "Its predecessor does NOT EXIST" << endl;
+            cout << "Its Predecessor does NOT EXIST" << endl;
       }
 }
 
@@ -611,10 +622,10 @@ void RedBlackTree::treeSuccessor(int vin, string model, string make) {
       //if its found, print the information, and if not found, print that it's not found
 
       if (successor != nullptr) {
-            cout << "Successor is FOUND." << endl;
+            cout << "Its Successor is: " << endl;
             print(successor);
       } else {
-            cout << "It's successor does NOT EXIST" << endl;
+            cout << "Its Successor does NOT EXIST" << endl;
 
       }
 }
@@ -643,6 +654,7 @@ void RedBlackTree::treeInsert(int vin, string model, string make, double price) 
       insertNode(newNode);
 
       //violations will be fixed when insertNode calls fixUp function
+      fixUp(newNode);
 }
 
 //******************************************************************
