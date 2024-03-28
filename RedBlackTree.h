@@ -1,6 +1,6 @@
 //************************************************************************
 // ASU CSE310 Assignment #6 Spring 2024
-// Author:
+// Author: Nilay Kumar
 // ASU ID:
 // Description: Red black tree header file. It defines the Node and the
 //              red black tree functionalities.
