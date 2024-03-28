@@ -1,12 +1,13 @@
 //************************************************************************
 // ASU CSE310 Assignment #6 Spring 2024
 // Author: Nilay Kumar
-// ASU ID: 1225127891
+// ASU ID: 
 // Description: this is the main program that reads input from keyboard,
 // it then execute various red-black tree operations which is given in the input.
 //**************************************************************************
 
 #include "RedBlackTree.h"
+#include <sstream>
 
 using namespace std;
 
@@ -45,7 +46,7 @@ int main()
          cout << "\nCommand: quit" << endl;
          //call the relevant function on the red black tree
          //----
-         RBT.~RedBlackTree();    //lets just call the destructor
+         //destructor is called automatically, don't need to add anything here
 
 
          break;
@@ -101,6 +102,19 @@ int main()
 
          //call the relevant function on the red black tree
          //----
+         if (RBT.treeSearch(vin, model, make) != nullptr) {         //find the node using treeSearch
+            cout << left;
+            cout << setw(8)  << vin
+                 << setw(12) << model
+                 << setw(12) << make
+                 << setw(10) << fixed << setprecision(2) << "is FOUND." << endl;
+         } else {
+            cout << left;
+            cout << setw(8)  << vin
+                 << setw(12) << model
+                 << setw(12) << make
+                 << setw(10) << fixed << setprecision(2) << "is NOT FOUND." << endl;
+         }
          
          RBT.treePredecessor(vin, model, make);       //call predecessor function
 
@@ -115,6 +129,21 @@ int main()
          cout << "\nCommand: tree_successor" << endl;
          //call the relevant function on the red black tree
          //----
+
+         if (RBT.treeSearch(vin, model, make) != nullptr) {         //find the node using treeSearch
+            cout << left;
+            cout << setw(8)  << vin
+                 << setw(12) << model
+                 << setw(12) << make
+                 << setw(10) << fixed << setprecision(2) << "is FOUND." << endl;
+         } else {
+            cout << left;
+            cout << setw(8)  << vin
+                 << setw(12) << model
+                 << setw(12) << make
+                 << setw(10) << fixed << setprecision(2) << "is NOT FOUND." << endl;
+         }
+
          RBT.treeSuccessor(vin, model, make);         //successor function called
       }
       else if(command.compare("tree_search")==0)
@@ -125,7 +154,21 @@ int main()
          cout << "\nCommand: tree_search" << endl;
          //call the relevant function on the red black tree
          //----
-         RBT.treeSearch(vin, model, make);         //find the node using treeSearch
+                  
+         if (RBT.treeSearch(vin, model, make) != nullptr) {         //find the node using treeSearch
+            cout << left;
+            cout << setw(8)  << vin
+                 << setw(12) << model
+                 << setw(12) << make
+                 << setw(10) << fixed << setprecision(2) << "is FOUND." << endl;
+         } else {
+            cout << left;
+            cout << setw(8)  << vin
+                 << setw(12) << model
+                 << setw(12) << make
+                 << setw(10) << fixed << setprecision(2) << "is NOT FOUND." << endl;
+         }   
+         
       }
       else if(command.compare("tree_insert")==0)
       {
@@ -158,26 +201,36 @@ void getCarKey(string oneLine, int& vin, string& model, string& make)
    //Design your own code here
    //----
 
+   string token;
    //we are going to do the same thing as in Assignment5.cpp
 
+   //getline(cin, oneLine);     //remember to actually get the line
    string delimiter = ",";          //comma is delimiter
-   int position = line.find(delimiter);      //find the position of delimiter
-   line.erase(0, position+delimiter.length());     //delete first phrase because we need the info that comes after it
+   int position = oneLine.find(delimiter);      //find the position of delimiter
+   //oneLine.erase(0, position+delimiter.length());     //delete first phrase because we need the info that comes after it
 
-   position = line.find(delimiter);             //this block is for the vin
-   token = line.substr(0, position);
-   vin = token;
-   line.erase(0, position+delimiter.length());
+   position = oneLine.find(delimiter);             //this block is for the vin
+   token = oneLine.substr(0, position);
+   istringstream ss1(token);                          //lines of code to get model
+   ss1 >> vin;
+   oneLine.erase(0, position+delimiter.length());
 
-   position = line.find(delimiter);          //this block is for the model
-   token = line.substr(0, position);
+   position = oneLine.find(delimiter);          //this block is for the model
+   token = oneLine.substr(0, position);
    model = token;
-   line.erase(0, position+delimiter.length());
+   oneLine.erase(0, position+delimiter.length());
 
-   position = line.find(delimiter);       //this block is for the make
-   token = line.substr(0, position);
+   position = oneLine.find(delimiter);       //this block is for the make
+   token = oneLine.substr(0, position);
    make = token;
-   line.erase(0, position+delimiter.length());
+   oneLine.erase(0, position+delimiter.length());
+   
+   //now lets make the node
+   Node* node = new Node;
+
+   node->vin = vin;
+   node->model = model;
+   node->make = make;
 
    //now lets make the key
    string nodeKey = to_string(node->vin) + node->model + node->make;
@@ -190,31 +243,35 @@ void getCarInfo(string oneLine, int& vin, string& model, string& make, double& p
 {
    //Design your own code here
    //----
+   string token;
 
+   //getline(cin, oneLine);     //get the line
    string delimiter = ",";          //comma is delimiter
-   int position = line.find(delimiter);      //find the position of delimiter
-   line.erase(0, position+delimiter.length());     //delete first phrase because we need the info that comes after it
+   int position = oneLine.find(delimiter);      //find the position of delimiter
+   //oneLine.erase(0, position+delimiter.length());     //delete first phrase because we need the info that comes after it
 
-   position = line.find(delimiter);             //this block is for the vin
-   token = line.substr(0, position);
-   vin = token;
-   line.erase(0, position+delimiter.length());
+   position = oneLine.find(delimiter);             //this block is for the vin
+   token = oneLine.substr(0, position);
+   istringstream ss2(token);                          //lines of code to get model
+   ss2 >> vin;
+   oneLine.erase(0, position+delimiter.length());
 
-   position = line.find(delimiter);          //this block is for the model
-   token = line.substr(0, position);
+   position = oneLine.find(delimiter);          //this block is for the model
+   token = oneLine.substr(0, position);
    model = token;
-   line.erase(0, position+delimiter.length());
+   oneLine.erase(0, position+delimiter.length());
 
-   position = line.find(delimiter);       //this block is for the make
-   token = line.substr(0, position);
+   position = oneLine.find(delimiter);       //this block is for the make
+   token = oneLine.substr(0, position);
    make = token;
-   line.erase(0, position+delimiter.length());
+   oneLine.erase(0, position+delimiter.length());
 
-   position = line.find(delimiter);       //this block is for the price
-   token = line.substr(0, position);
-   price = token;
-   line.erase(0, position+delimiter.length());
-
+   position = oneLine.find(delimiter);       //this block is for the price
+   token = oneLine.substr(0, position);
+   istringstream ss3(token);                          //lines of code to get model
+   ss3 >> price;
+   oneLine.erase(0, position+delimiter.length());
 
 }
+
 
